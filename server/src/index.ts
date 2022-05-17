@@ -1,7 +1,8 @@
-const app = require('express')();
+import express from 'express';
+const app = express()
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-const path = require('path');
+import path from 'path';
 import { Socket } from 'socket.io';
 import { GameController } from './modules/game/game.controller'
 
@@ -12,12 +13,13 @@ app.get('/', function(req, res) {
 
 let player1: Socket | null = null;
 let player2: Socket | null = null;
-let game;
+let game: GameController = null
 
 enum EventList {
     GameFull = 'GameFull',
     SetPlayerIdentity = 'SetPlayerIdentity',
     GameStart = 'GameStart',
+    PlayToken = 'PlayToken'
 }
 
 
@@ -40,13 +42,18 @@ io.on('connection', function(socket) {
 
         if (player1 && player2) {
             console.log("START !!!")
-            const game = new GameController(player1, player2)
+            game = new GameController(player1, player2)
             io.emit(EventList.GameStart, game.getBoardState())
         } else {
-            console.log("waiting an other player")
+            console.log("Waiting another player")
             socket.emit('wait');
         }
     }
+
+    socket.on('click', function(cellId) {
+        io.emit(EventList.PlayToken, game.PutTokenToBoard(cellId))
+    });
+
 
     //Whenever someone disconnects this piece of code executed
     socket.on('disconnect', function () {
