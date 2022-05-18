@@ -1,3 +1,5 @@
+import { PlayerSocket } from '@common/types/game.type';
+import { randomUUID } from 'crypto';
 import { Socket } from 'socket.io';
 import {
   ComputeColumns,
@@ -9,19 +11,19 @@ import {
   GetLine,
   GetDiagonal,
 } from './gameUtils.lib';
-type ComputedBoardArea = Array<number[]>;
 
 const BOARD_SIZE = 7;
 
-export class GameController {
+export class GameSession {
+  _id: string;
   private gameStatus: 'playing' | 'win' | 'draw' = 'playing';
   private gameBoard: number[];
   private gameTurnCount: number;
   private activePlayer: 1 | 2 = 1;
   private canPlay = true;
 
-  private player1: Socket;
-  private player2: Socket;
+  private player1: PlayerSocket;
+  private player2: PlayerSocket;
 
   private winCoordinates: number[] = [];
   private scores: { player1: number; player2: number } = {
@@ -29,15 +31,17 @@ export class GameController {
     player2: 0,
   };
 
-  constructor(player1: Socket, player2: Socket) {
+  constructor(player1: PlayerSocket, player2: PlayerSocket) {
+    this._id = randomUUID();
     this.gameBoard = Array.from({ length: BOARD_SIZE * BOARD_SIZE }, () => 0);
     this.gameTurnCount = 0;
     this.player1 = player1;
     this.player2 = player2;
   }
 
-  getBoardState() {
+  getGameState() {
     return {
+      _id: this._id,
       gameBoard: this.gameBoard,
       gameTurnCount: this.gameTurnCount,
       activePlayer: this.activePlayer,
