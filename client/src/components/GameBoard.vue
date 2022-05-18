@@ -15,7 +15,7 @@
         <div class="h-screen w-full bg-gray-400 w-[calc(100% - 2em)] flex flex-col justify-start items-center gap-2 p-4 overflow-y-auto z-50">
             <h3 class="title">PUISSSANCE 4</h3>
             <hr style="width: 80%" />
-            <h3 v-if="!gameState.winCoordinates?.length">TOUR DU JOUEUR {{ gameState.activePlayer }}</h3>
+            <h3 v-if="!gameState.winCoordinates?.length">TOUR DU JOUEUR {{ gameState.activePlayer === gameState.activePlayer }}</h3>
             <h3 v-else :class="gameState.winner === playerIdentity ? 'text-green-500' : 'text-red-500'">
                 {{ gameState.winner === playerIdentity ? "VOUS AVEZ GAGNE" : "VOUS AVEZ PERDU" }}
             </h3>
