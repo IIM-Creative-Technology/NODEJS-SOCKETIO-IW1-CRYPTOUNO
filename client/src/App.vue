@@ -1,6 +1,6 @@
 <template>
     <AppProvider>
-        <GameBoard />
+        <router-view />
     </AppProvider>
 </template>
 
