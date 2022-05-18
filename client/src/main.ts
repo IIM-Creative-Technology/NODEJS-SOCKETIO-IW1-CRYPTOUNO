@@ -1,6 +1,25 @@
 import { createApp } from "vue";
 import App from "./App.vue";
-import NaiveUI from "naive-ui";
+import naive from "naive-ui";
 import "virtual:windi.css";
+import { createPinia } from "pinia";
+import piniaPersist from "pinia-plugin-persist";
+import router from "./router";
 
-createApp(App).use(NaiveUI).mount("#app");
+async function bootstrap() {
+    const app = createApp(App);
+    const store = createPinia();
+
+    //STORE PLUGINS
+    store.use(piniaPersist);
+
+    // APP PLUGINS
+    app.use(naive);
+    app.use(router);
+    app.use(store);
+
+    await router.isReady();
+    app.mount("#app");
+}
+
+bootstrap();
