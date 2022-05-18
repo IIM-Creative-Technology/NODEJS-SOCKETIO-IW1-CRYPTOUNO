@@ -46,7 +46,7 @@ export class GameController {
       winCoordinates: this.winCoordinates,
       canPlay: this.canPlay,
       scores: this.scores,
-      winner: this.winCoordinates.length > 0 ? (this.activePlayer === 1 ? this.player1.id : this.player2.id) : null,
+      winner: this.winCoordinates.length > 0 ? this.activePlayer : null,
     };
   }
 
