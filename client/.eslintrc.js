@@ -13,5 +13,11 @@ module.exports = {
         "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
         "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
         "prettier/prettier": ["error", {}, { usePrettierrc: true }],
+        "vue/multi-word-component-names": [
+            "error",
+            {
+                ignores: ["register", "login", "index"],
+            },
+        ],
     },
 };
