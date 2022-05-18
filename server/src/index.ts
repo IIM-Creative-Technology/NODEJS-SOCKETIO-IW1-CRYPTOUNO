@@ -1,7 +1,11 @@
 import express from 'express';
 const app = express()
 const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const io = require('socket.io')(http, {
+    cors: {
+        origin: '*',
+    }
+});
 import path from 'path';
 import { Socket } from 'socket.io';
 import { GameController } from './modules/game/game.controller'
@@ -19,7 +23,9 @@ enum EventList {
     GameFull = 'GameFull',
     SetPlayerIdentity = 'SetPlayerIdentity',
     GameStart = 'GameStart',
-    PlayToken = 'PlayToken'
+    PlayToken = 'PlayToken',
+    PutToken = 'PutToken',
+    UpdateGameState = 'UpdateGameState',
 }
 
 
@@ -50,10 +56,10 @@ io.on('connection', function(socket) {
         }
     }
 
-    socket.on('click', function(cellId) {
-        io.emit(EventList.PlayToken, game.PutTokenToBoard(cellId))
+    socket.on(EventList.PutToken, function(cellId: number) {
+        game.PutTokenToBoard(cellId)
+        io.emit(EventList.UpdateGameState, game.getBoardState())
     });
-
 
     //Whenever someone disconnects this piece of code executed
     socket.on('disconnect', function () {

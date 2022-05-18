@@ -98,11 +98,6 @@ export const CheckWinOnAxis = (
         countConsecutiveTokens++;
       } else break;
     }
-    if (countConsecutiveTokens >= 4) break;
-    else {
-      countConsecutiveTokens = 1;
-      winCoordinates = [targetCell];
-    }
   }
 
   const isGameWin = countConsecutiveTokens >= 4;

@@ -40,17 +40,13 @@ export class GameController {
 
   getBoardState() {
     return {
-      boardSize: BOARD_SIZE,
-      gameStatus: this.gameStatus,
       gameBoard: this.gameBoard,
       gameTurnCount: this.gameTurnCount,
       activePlayer: this.activePlayer,
       winCoordinates: this.winCoordinates,
       canPlay: this.canPlay,
       scores: this.scores,
-      winner: this.winCoordinates.length > 0 ? (this.activePlayer === 1 ? this.player1 : this.player2) : null,
-      player1: this.player1.id,
-      player2: this.player2.id,
+      winner: this.winCoordinates.length > 0 ? (this.activePlayer === 1 ? this.player1.id : this.player2.id) : null,
     };
   }
 
@@ -67,7 +63,7 @@ export class GameController {
 
     if (win) {
       this.canPlay = false;
-      //   scores.value[`player${activePlayer.value}`]++;
+      this.scores[`player${this.activePlayer}`]++;
       this.winCoordinates = coordinates as number[];
       return { event: 'Win' };
     }
@@ -113,6 +109,7 @@ export class GameController {
       this.activePlayer,
       this.gameBoard,
     );
+
     const [winLine, winLineCoordinates] = CheckWinOnAxis(
       line,
       targetCell,
