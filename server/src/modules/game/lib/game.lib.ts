@@ -1,4 +1,4 @@
-import { PlayerSocket } from '@common/types/game.type';
+import { PlayerSocket, PutTokenOutputEvent } from '@common/types/game.type';
 import { randomUUID } from 'crypto';
 import { Socket } from 'socket.io';
 import {
@@ -13,6 +13,16 @@ import {
 } from './gameUtils.lib';
 
 const BOARD_SIZE = 7;
+
+export interface GameState {
+  _id: string;
+  gameBoard: number[];
+  gameTurnCount: number;
+  activePlayer: 1 | 2;
+  winCoordinates: number[] | null;
+  canPlay: boolean;
+  winner: string | null;
+}
 
 export class GameSession {
   _id: string;
@@ -39,7 +49,7 @@ export class GameSession {
     this.player2 = player2;
   }
 
-  getGameState() {
+  getGameState(): GameState {
     return {
       _id: this._id,
       gameBoard: this.gameBoard,
@@ -47,16 +57,32 @@ export class GameSession {
       activePlayer: this.activePlayer,
       winCoordinates: this.winCoordinates,
       canPlay: this.canPlay,
-      scores: this.scores,
-      winner: this.winCoordinates.length > 0 ? this.activePlayer : null,
+      winner:
+        this.winCoordinates.length > 0
+          ? this.activePlayer === 1
+            ? this.player1.data._id
+            : this.player2.data._id
+          : null,
     };
   }
 
-  PutTokenToBoard(targetCell: number) {
+  getActivePlayer() {
+    return this.activePlayer;
+  }
+
+  getPlayerIds() {
+    return [this.player1.data._id, this.player2.data._id];
+  }
+
+  putTokenToBoard(targetCell: number): {
+    event: `${PutTokenOutputEvent}`;
+    gameState: GameState;
+  } {
     const column = GetColumn(this.getColumns(), targetCell);
     const availableCell = GetFirstAvailableCellCol(column, this.gameBoard);
 
-    if (!availableCell) return { event: 'CellNotAvailable' };
+    if (!availableCell)
+      return { event: 'CellNotAvailable', gameState: this.getGameState() };
 
     this.gameBoard[availableCell] = this.activePlayer;
     this.gameTurnCount++;
@@ -67,16 +93,16 @@ export class GameSession {
       this.canPlay = false;
       this.scores[`player${this.activePlayer}`]++;
       this.winCoordinates = coordinates as number[];
-      return { event: 'Win' };
+      return { event: 'Win', gameState: this.getGameState() };
     }
 
     if (even) {
       this.canPlay = false;
-      return { event: 'Even' };
+      return { event: 'Draw', gameState: this.getGameState() };
     }
 
     this.UpdateActivePlayer();
-    return { event: 'Success' };
+    return { event: 'Continue', gameState: this.getGameState() };
   }
 
   private UpdateActivePlayer() {

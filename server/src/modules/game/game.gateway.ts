@@ -1,3 +1,4 @@
+import { GameRecordResult } from './../../common/types/game.type';
 import { GameService } from '@modules/game/game.service';
 import { PlayerService } from '@modules/player/player.service';
 import { Logger, UnauthorizedException, UseGuards } from '@nestjs/common';
@@ -16,7 +17,12 @@ import { GameSession } from './lib/game.lib';
 import { PlayerStatus } from '@common/types/player.type';
 import { RequestDuelDto } from './dto/requestDuel.dto';
 import { AnswerDuelDto } from './dto/answerDuel.dto';
-import { GameInvitation, PlayerSocket } from '@common/types/game.type';
+import {
+  GameInvitation,
+  PlayerSocket,
+  PutTokenOutputEvent,
+} from '@common/types/game.type';
+import { PutTokenToBoardDto } from './dto/putTokenToBoard.dot';
 
 @WebSocketGateway()
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -53,7 +59,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
     }
 
-    if (targetPlayerSocket.data.game) {
+    if (targetPlayerSocket.data.gameId) {
       Logger.debug(
         `Game invitation failed - Player ${data.playerId} already in game`,
         'GameGateway',
@@ -79,8 +85,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: AnswerDuelDto,
   ) {
     const invitation = this.findInvitationById(data.invitationId);
-    const requester = this.findUserById(invitation?.requester?._id);
-    const requestee = this.findUserById(invitation?.responder?._id);
+    const requester = this.findPlayerById(invitation?.requester?._id);
+    const requestee = this.findPlayerById(invitation?.responder?._id);
 
     if (!invitation) {
       Logger.debug(
@@ -98,12 +104,59 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const gameSession = new GameSession(requestee, requester);
-    this.addPlayerToGame(requestee, gameSession, 1);
-    this.addPlayerToGame(requester, gameSession, 2);
+    await this.addPlayerToGame(requestee, gameSession, 1);
+    await this.addPlayerToGame(requester, gameSession, 2);
     GameGateway.games.push(gameSession);
     this.server
       .to(gameSession._id)
       .emit('game-started', gameSession.getGameState());
+  }
+
+  @SubscribeMessage('put-token-to-board')
+  async putTokenToBoard(client: PlayerSocket, data: PutTokenToBoardDto) {
+    const player = this.findPlayerBySocket(client);
+    const game = this.findGameById(player.data.gameId);
+
+    if (!game) {
+      Logger.debug(
+        `Put token to board failed (Player ${player.data._id}) - Game not found`,
+        'GameGateway',
+      );
+      return client.emit('put-token-to-board-failed', 'Game not found');
+    }
+
+    if (game.getActivePlayer() != player.data.playerNumber) {
+      Logger.debug(
+        `Put token to board failed (Player ${player.data._id}) - Not your turn to play`,
+        'GameGateway',
+      );
+      return client.emit('put-token-to-board-failed', 'Not your turn to play');
+    }
+
+    const { event, gameState } = game.putTokenToBoard(data.cellId);
+    if (event === PutTokenOutputEvent.CellNotAvailable) {
+      Logger.debug(
+        `Put token to board failed (Player ${player.data._id}) - Cell not available`,
+        'GameGateway',
+      );
+      return client.emit('put-token-to-board-failed', 'Cell not available');
+    }
+
+    if (
+      [PutTokenOutputEvent.Draw, PutTokenOutputEvent.Win].includes(
+        event as PutTokenOutputEvent,
+      )
+    ) {
+      this.server.to(game._id).emit('game-ended', gameState);
+      await this.gameService.saveGameRecord(
+        game.getPlayerIds(),
+        event as GameRecordResult,
+        gameState.winner,
+      );
+      this.removeGameFromStore(game);
+    }
+
+    this.server.to(game._id).emit('update-game-state', gameState);
   }
 
   async handleConnection(@ConnectedSocket() client: Socket) {
@@ -121,16 +174,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
-    const findPlayerQuery = (player: PlayerSocket) => player.id === client.id;
-    const playerSocket = GameGateway.players.find(findPlayerQuery);
+    const playerSocket = this.findPlayerBySocket(client);
+    this.removePlayerFromStore(playerSocket);
 
     await this.playerService.setPlayerStatus(
       playerSocket.data._id,
       PlayerStatus.OFFLINE,
-    );
-    GameGateway.players.splice(
-      GameGateway.players.findIndex(findPlayerQuery),
-      1,
     );
 
     Logger.debug(
@@ -140,11 +189,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('player-offline', playerSocket.data);
   }
 
-  private findUserById(id: string) {
+  private findPlayerById(id: string) {
     return GameGateway.players.find((player) => player.data._id === id);
   }
 
-  private findUserBySocket(socket: Socket) {
+  private findPlayerBySocket(socket: Socket) {
     return GameGateway.players.find((player) => player.id === socket.id);
   }
 
@@ -156,16 +205,43 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return GameGateway.invitations.find((invitation) => invitation._id === id);
   }
 
-  private addPlayerToGame(
+  private async addPlayerToGame(
     player: PlayerSocket,
     game: GameSession,
     playerNumber,
   ) {
     player.data.gameId = game._id;
     player.data.playerNumber = playerNumber;
+
     GameGateway.players[
       GameGateway.players.findIndex((socket) => socket.id === player.id)
     ] = player;
+
     player.join(game._id);
+    return this.playerService.setPlayerStatus(
+      player.data._id,
+      PlayerStatus.IN_GAME,
+    );
+  }
+
+  private removeGameFromStore(game: GameSession) {
+    GameGateway.games.splice(
+      GameGateway.games.findIndex((g) => g._id === game._id),
+      1,
+    );
+  }
+
+  private removePlayerFromStore(user: PlayerSocket) {
+    GameGateway.players.splice(
+      GameGateway.players.findIndex((socket) => socket.id === user.id),
+      1,
+    );
+  }
+
+  private removeInvitationFromStore(invitation: GameInvitation) {
+    GameGateway.invitations.splice(
+      GameGateway.invitations.findIndex((inv) => inv._id === invitation._id),
+      1,
+    );
   }
 }

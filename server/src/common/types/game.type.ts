@@ -15,3 +15,15 @@ export interface GameInvitation {
   requester: PlayerSocket['data'];
   responder: PlayerSocket['data'];
 }
+
+export enum PutTokenOutputEvent {
+  CellNotAvailable = 'CellNotAvailable',
+  Win = 'Win',
+  Draw = 'Draw',
+  Continue = 'Continue',
+}
+
+export enum GameRecordResult {
+  Win = 'Win',
+  Draw = 'Draw',
+}
