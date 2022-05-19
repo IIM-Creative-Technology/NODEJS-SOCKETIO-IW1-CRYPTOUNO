@@ -1,6 +1,6 @@
 <template>
     <div ref="cardWrapper" class="cursor-pointer">
-        <NCard content-style="aspect-ratio:1/1;width:100%;height:auto;" :embedded="isHovered">
+        <NCard class="w-full" :embedded="isHovered">
             <div class="w-full h-full grid place-items-center">
                 <div class="flex flex-col gap-2 text-center items-center">
                     <NIcon v-if="$slots.icon" :size="50">

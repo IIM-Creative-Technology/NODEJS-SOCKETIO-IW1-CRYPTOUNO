@@ -1,9 +1,10 @@
 import { defineStore } from "pinia";
 import router from "~/router";
+import { AuthController } from "~/api/controllers/auth.controller";
+import { useWallet } from "solana-wallets-vue";
 
 interface IUserStore {
-    accessToken: null | string;
-    user: null | { _id: string; username: string };
+    user: null | { _id: string; username: string; walletToken: string };
 }
 
 export const useUserStore = defineStore("user", {
@@ -14,16 +15,18 @@ export const useUserStore = defineStore("user", {
         } as IUserStore),
     getters: {
         isLoggedIn(): boolean {
-            return !!this.accessToken;
+            return !!this.user;
         },
     },
     actions: {
-        logIn(walletToken: string) {
-            this.accessToken = "API_JWT_TOKEN";
-            this.user = { _id: "API_USER_ID", username: "API_USER_NAME" };
+        async logIn(walletToken: string) {
+            const player = await AuthController.authenticate(walletToken);
+            this.user = player as IUserStore["user"];
+            setTimeout(() => router.push("/"), 100);
         },
-        logOut() {
-            this.accessToken = null;
+        async logOut() {
+            const { disconnect } = useWallet();
+            await disconnect();
             this.user = null;
             router.push("/auth/login");
         },

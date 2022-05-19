@@ -10,7 +10,7 @@ interface DialogOptions {
     closable?: boolean;
 }
 
-export const useConfirmDialog = ({ type = "create", title, content, positiveText = "Yes", negativeText = "No" }: DialogOptions) =>
+export const useConfirmDialog = ({ type = "create", title, content, positiveText = "Yes", negativeText = "No" }: DialogOptions): Promise<boolean> =>
     new Promise((resolve) => {
         const { dialogApi } = useReactifiedApi();
         dialogApi?.[type]({

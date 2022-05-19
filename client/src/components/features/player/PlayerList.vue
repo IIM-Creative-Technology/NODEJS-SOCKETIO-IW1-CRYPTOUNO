@@ -1,37 +1,49 @@
 <template>
-    <TransitionGroup v-if="players?.length" tag="div" name="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
-        <ActionCard v-for="player in players" :key="player._id">
-            <template #icon>
-                <mdi:user />
+    <div class="flex flex-col gap-8 p-12">
+        <NCard>
+            <template #header>
+                <div class="text-2xl flex items-center gap-2">
+                    <mdi:users />
+                    <span class="uppercase">Players lobby</span>
+                </div>
             </template>
-            <b>{{ player.username }}</b>
-            <NTag :type="player.gameId ? 'warning' : 'success'">{{ player.gameId ? "Dans une partie" : "Dans le lobby" }}</NTag>
-
-            <NDivider class="!m-0 !my-2 w-full" />
-            <NButton secondary type="primary" :disabled="!!player.gameId">
+            <template #header-extra> {{ players.filter((player) => player._id != userStore.user?._id)?.length }} online </template>
+        </NCard>
+        <TransitionGroup v-if="players.filter((player) => player._id != userStore.user?._id)?.length" tag="div" name="list" class="flex flex-col gap-4">
+            <ActionCard v-for="player in players.filter((player) => player._id != userStore.user?._id)" :key="player._id">
                 <template #icon>
-                    <NIcon><mdi:sword /></NIcon>
+                    <mdi:user />
                 </template>
-                Défier
-            </NButton>
-        </ActionCard>
-    </TransitionGroup>
-    <div v-else class="w-full h-16 grid place-items-center">
-        <NEmpty> No players connected </NEmpty>
+                <NEllipsis>
+                    <b>{{ player.username }}</b>
+                </NEllipsis>
+                <NTag :type="player.gameId ? 'warning' : 'success'">{{ player.gameId ? "Dans une partie" : "Dans le lobby" }}</NTag>
+
+                <NDivider class="!m-0 !my-2 w-full" />
+                <NButton secondary type="primary" :disabled="!!player.gameId || invitationDisabled" @click="$emit('SendInvitation', player._id)">
+                    <template #icon>
+                        <NIcon><mdi:sword /></NIcon>
+                    </template>
+                    Défier
+                </NButton>
+            </ActionCard>
+        </TransitionGroup>
+        <div v-else class="w-full h-16 grid place-items-center">
+            <NEmpty> No players connected </NEmpty>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
     import ActionCard from "~/components/generic/ActionCard.vue";
-
-    interface PlayerData {
-        _id: string;
-        username: string;
-        gameId?: string;
-    }
+    import { useUserStore } from "~/stores/user.store";
+    import { ILobbyPlayer } from "~/types/player.type";
 
     // eslint-disable-next-line no-undef
-    const props = defineProps<{ players: PlayerData[] }>();
+    const emit = defineEmits(["SendInvitation"]);
+    // eslint-disable-next-line no-undef
+    const props = defineProps<{ players: ILobbyPlayer[]; invitationDisabled: boolean }>();
+    const userStore = useUserStore();
 </script>
 
 <style>
