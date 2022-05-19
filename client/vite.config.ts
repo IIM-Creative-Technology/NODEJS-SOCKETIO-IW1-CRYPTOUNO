@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import Vue from "@vitejs/plugin-vue";
+import VueJsx from "@vitejs/plugin-vue-jsx";
 import WindiCSS from "vite-plugin-windicss";
 import Pages from "vite-plugin-pages";
 import Layouts from "vite-plugin-vue-layouts";
@@ -18,6 +19,7 @@ export default defineConfig({
     },
     plugins: [
         Vue(),
+        VueJsx(),
         WindiCSS(),
         Pages(),
         Layouts({
