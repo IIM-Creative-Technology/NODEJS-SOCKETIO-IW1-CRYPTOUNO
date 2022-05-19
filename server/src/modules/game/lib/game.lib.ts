@@ -1,4 +1,5 @@
 import { PlayerSocket, PutTokenOutputEvent } from '@common/types/game.type';
+import { Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Socket } from 'socket.io';
 import {
@@ -18,7 +19,7 @@ export interface GameState {
   _id: string;
   gameBoard: number[];
   gameTurnCount: number;
-  activePlayer: 1 | 2;
+  activePlayer: string;
   winCoordinates: number[] | null;
   canPlay: boolean;
   winner: string | null;
@@ -54,20 +55,22 @@ export class GameSession {
       _id: this._id,
       gameBoard: this.gameBoard,
       gameTurnCount: this.gameTurnCount,
-      activePlayer: this.activePlayer,
+      activePlayer: this.getActivePlayerId() ,
       winCoordinates: this.winCoordinates,
       canPlay: this.canPlay,
       winner:
         this.winCoordinates.length > 0
-          ? this.activePlayer === 1
-            ? this.player1.data._id
-            : this.player2.data._id
+          ? this.getActivePlayerId()
           : null,
     };
   }
 
   getActivePlayer() {
     return this.activePlayer;
+  }
+
+  getActivePlayerId() {
+    return this.activePlayer === 1 ? this.player1.data._id : this.player2.data._id;
   }
 
   getPlayerIds() {
@@ -78,6 +81,7 @@ export class GameSession {
     event: `${PutTokenOutputEvent}`;
     gameState: GameState;
   } {
+    Logger.debug(`TargetCell: ${targetCell}`, 'GameSession');
     const column = GetColumn(this.getColumns(), targetCell);
     const availableCell = GetFirstAvailableCellCol(column, this.gameBoard);
 
