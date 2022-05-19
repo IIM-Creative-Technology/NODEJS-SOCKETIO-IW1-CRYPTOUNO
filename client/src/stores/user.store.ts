@@ -1,12 +1,16 @@
 import { defineStore } from "pinia";
 
-// useStore could be anything like useUser, useCart
-// the first argument is a unique id of the store across your application
+interface IUserStore {
+    accessToken: null | string;
+    user: null | { _id: string; username: string };
+}
+
 export const useUserStore = defineStore("user", {
-    state: () => ({
-        accessToken: null,
-        user: null,
-    }),
+    state: () =>
+        ({
+            accessToken: null,
+            user: null,
+        } as IUserStore),
     getters: {
         isLoggedIn(): boolean {
             return !!this.accessToken;
