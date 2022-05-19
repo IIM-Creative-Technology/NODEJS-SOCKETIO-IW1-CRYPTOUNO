@@ -10,9 +10,6 @@ ApiInstance.interceptors.request.use((config) => {
     const userStore = useUserStore();
     config.headers = {
         ...config.headers,
-        ...((userStore.accessToken && {
-            Authorization: `Bearer ${userStore.accessToken}`,
-        }) as unknown as { Authorization: string }),
     };
     return config;
 });
