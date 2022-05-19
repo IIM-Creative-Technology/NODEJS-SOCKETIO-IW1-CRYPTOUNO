@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import appConfig from '@config/app.config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { HeddibuApiModule } from './modules/heddibu-api/heddibu-api.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     PlayerModule,
     GameModule,
     AuthModule,
+    HeddibuApiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

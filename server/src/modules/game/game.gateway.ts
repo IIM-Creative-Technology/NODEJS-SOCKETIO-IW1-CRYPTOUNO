@@ -1,4 +1,4 @@
-import { GameRecordResult } from './../../common/types/game.type';
+import { GameRecordResult } from '@common/types/game.type';
 import { GameService } from '@modules/game/game.service';
 import { PlayerService } from '@modules/player/player.service';
 import { Logger } from '@nestjs/common';
