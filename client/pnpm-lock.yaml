@@ -2,12 +2,14 @@ lockfileVersion: 5.3
 
 specifiers:
   '@chronicstone/vue-sweetforms': ^0.4.10
+  '@iconify-json/ci': ^1.1.1
   '@iconify-json/ic': ^1.0.8
   '@iconify-json/mdi': ^1.1.10
   '@trivago/prettier-plugin-sort-imports': ^3.2.0
   '@typescript-eslint/eslint-plugin': ^5.17.0
   '@typescript-eslint/parser': ^5.17.0
   '@vitejs/plugin-vue': ^2.3.3
+  '@vitejs/plugin-vue-jsx': ^1.3.10
   '@vue/eslint-config-prettier': ^7.0.0
   '@vue/eslint-config-typescript': ^10.0.0
   '@vueuse/core': ^8.5.0
@@ -40,6 +42,7 @@ specifiers:
 
 dependencies:
   '@chronicstone/vue-sweetforms': 0.4.10_c3d7aa77557a02b5e47900bfdb24d474
+  '@vitejs/plugin-vue-jsx': 1.3.10
   '@vueuse/core': 8.5.0_vue@3.2.33
   axios: 0.27.2
   deepmerge-ts: 4.0.3
@@ -53,6 +56,7 @@ dependencies:
   vue-router: 4.0.15_vue@3.2.33
 
 devDependencies:
+  '@iconify-json/ci': 1.1.1
   '@iconify-json/ic': 1.1.4
   '@iconify-json/mdi': 1.1.15
   '@trivago/prettier-plugin-sort-imports': 3.2.0_prettier@2.6.2
@@ -513,6 +517,12 @@ packages:
 
   /@humanwhocodes/object-schema/1.2.1:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
+
+  /@iconify-json/ci/1.1.1:
+    resolution: {integrity: sha512-ne63Km3073skNaVB++Gvd6Pll0c5ZGf1dpBIoUVL1aoUqE/V5e/CoXvkPOj8EtE+AnaYlRM1/JaRSJqL6tSkrQ==}
+    dependencies:
+      '@iconify/types': 1.1.0
+    dev: true
 
   /@iconify-json/ic/1.1.4:
     resolution: {integrity: sha512-NkcyCh3VHwm3L19Ys4PDnbJmMoSE6vd83xjfWofmoeKKebs4tktz/LhPIy9vcaDqRENTNVtDORQdv0e+HCOjSg==}
