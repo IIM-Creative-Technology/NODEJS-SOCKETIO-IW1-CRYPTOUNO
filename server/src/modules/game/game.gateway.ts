@@ -24,7 +24,7 @@ import {
 } from '@common/types/game.type';
 import { PutTokenToBoardDto } from './dto/putTokenToBoard.dot';
 
-@WebSocketGateway(3000, { cors: { origin: "*" } })
+@WebSocketGateway(8080, { cors: { origin: "*" } })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   public static players: PlayerSocket[] = [];
