@@ -1,7 +1,7 @@
 import { PlayerStatus } from '@common/types/player.type';
 import { PlayerDocument, Player } from '@schemas/player.schema';
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import mongoose, { Model, Mongoose } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class PlayerService {
   ) {}
 
   findOne(id: string): Promise<PlayerDocument> {
-    return this.playerModel.findOne({ _id: id }).exec();
+    return this.playerModel.findOne({ _id: new mongoose.Types.ObjectId(id) }).exec();
   }
 
   setPlayerStatus(id: string, status: PlayerStatus): Promise<PlayerDocument> {
