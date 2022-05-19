@@ -1,7 +1,7 @@
 import { GameRecordResult } from './../../common/types/game.type';
 import { GameService } from '@modules/game/game.service';
 import { PlayerService } from '@modules/player/player.service';
-import { Logger, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -159,10 +159,27 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(game._id).emit('update-game-state', gameState);
   }
 
-  async handleConnection(@ConnectedSocket() client: Socket) {
-    const { _id } = client.handshake.query;
+  @SubscribeMessage('return-to-matchmaking')
+  async returnToMatchmaking(client: PlayerSocket) {
+    const player = this.findPlayerBySocket(client);
+    player.data = { ...player.data, gameId: null, playerNumber: null };
 
-    const player = await this.playerService.findOne(_id as string);
+    GameGateway.players[
+      GameGateway.players.findIndex((p) => p.id === player.id)
+    ] = player;
+
+    await this.playerService.setPlayerStatus(
+      player.data._id,
+      PlayerStatus.ONLINE,
+    );
+
+    player.broadcast.emit('player-online', player.data);
+  }
+
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    const { playerId } = client.handshake.query;
+
+    const player = await this.playerService.findOne(playerId as string);
     player.status = PlayerStatus.ONLINE;
     await player.save();
 
@@ -186,7 +203,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       `Player ${playerSocket.data.username} is OFFLINE`,
       'GameGateway',
     );
-    this.server.emit('player-offline', playerSocket.data);
+    playerSocket.broadcast.emit('player-offline', playerSocket.data);
   }
 
   private findPlayerById(id: string) {
@@ -218,6 +235,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     ] = player;
 
     player.join(game._id);
+
+    player.broadcast.emit('player-joined-game', player.data);
     return this.playerService.setPlayerStatus(
       player.data._id,
       PlayerStatus.IN_GAME,
