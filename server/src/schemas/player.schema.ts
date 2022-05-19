@@ -25,7 +25,7 @@ export class Player {
   walletToken: string;
 
   @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }])
-  playedGames: Game[];
+  playedGames?: Game[];
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);
