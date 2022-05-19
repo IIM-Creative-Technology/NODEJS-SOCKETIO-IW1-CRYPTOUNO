@@ -1,6 +1,7 @@
 lockfileVersion: 5.3
 
 specifiers:
+  '@nestjs/axios': ^0.0.8
   '@nestjs/cli': ^8.0.0
   '@nestjs/common': ^8.0.0
   '@nestjs/config': ^2.0.1
@@ -40,6 +41,7 @@ specifiers:
   typescript: ^4.3.5
 
 dependencies:
+  '@nestjs/axios': 0.0.8_74a5f58103aca90eb73831b6f499f41f
   '@nestjs/common': 8.4.5_5199533202e21c7185c9d97f881e2827
   '@nestjs/config': 2.0.1_74a5f58103aca90eb73831b6f499f41f
   '@nestjs/core': 8.4.5_8d45aa06b1c1dc9d06694201f1d791dd
@@ -815,6 +817,21 @@ packages:
     transitivePeerDependencies:
       - encoding
       - supports-color
+    dev: false
+
+  /@nestjs/axios/0.0.8_74a5f58103aca90eb73831b6f499f41f:
+    resolution: {integrity: sha512-oJyfR9/h9tVk776il0829xyj3b2e81yTu6HjPraxynwNtMNGqZBHHmAQL24yMB3tVbBM0RvG3eUXH8+pRCGwlg==}
+    peerDependencies:
+      '@nestjs/common': ^7.0.0 || ^8.0.0
+      reflect-metadata: ^0.1.12
+      rxjs: ^6.0.0 || ^7.0.0
+    dependencies:
+      '@nestjs/common': 8.4.5_5199533202e21c7185c9d97f881e2827
+      axios: 0.27.2
+      reflect-metadata: 0.1.13
+      rxjs: 7.5.5
+    transitivePeerDependencies:
+      - debug
     dev: false
 
   /@nestjs/cli/8.2.6:

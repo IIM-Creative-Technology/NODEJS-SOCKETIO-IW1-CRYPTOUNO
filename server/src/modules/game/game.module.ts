@@ -6,10 +6,11 @@ import { Player, PlayerSchema } from '@schemas/player.schema';
 import { GameController } from './game.controller';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
+import { HeddibuApiModule } from '@modules/heddibu-api/heddibu-api.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature(
+  MongooseModule.forFeature(
       [
         { name: Player.name, schema: PlayerSchema },
         { name: Game.name, schema: GameSchema },
@@ -17,6 +18,7 @@ import { GameService } from './game.service';
       'mongo',
     ),
     PlayerModule,
+    HeddibuApiModule
   ],
   controllers: [GameController],
   providers: [GameService, GameGateway],
