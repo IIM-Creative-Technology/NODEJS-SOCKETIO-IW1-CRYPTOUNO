@@ -1,20 +1,25 @@
 <template>
-    <div class="flex flex-col gap-4">
-        <Form :form-options="LoginFormSchema" clas="h-auto" class="authForm" @onSubmit="SubmitAuth">
-            <template #actions="{ toggleSubmit }">
-                <NButton secondary class="w-full" type="primary" @click="toggleSubmit">Sign in</NButton>
-            </template>
-        </Form>
+    <div class="flex flex-col gap-4 items-center">
+        <SolanaAuth />
     </div>
 </template>
 
 <script setup lang="ts">
-    import { Form } from "@chronicstone/vue-sweetforms";
-    import { LoginFormSchema } from "~/schemas/auth.schema";
+    import SolanaAuth from "~/components/features/player/SolanaAuth.vue";
+    import { useWallet } from "solana-wallets-vue";
+    import { watch } from "vue";
+    import { useUserStore } from "~/stores/user.store";
 
-    const SubmitAuth = (data: { walletToken: string }) => {
-        console.log({ data });
-    };
+    const userStore = useUserStore();
+
+    const { publicKey } = useWallet();
+    watch(
+        () => publicKey.value,
+        (publicKey) => publicKey?.toBase58() && userStore.logIn(publicKey?.toBase58()),
+        { immediate: true, deep: true },
+    );
+
+    //
 </script>
 
 <route lang="yaml">

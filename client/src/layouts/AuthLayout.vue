@@ -22,11 +22,11 @@
                                 <span>Sign in</span>
                             </div>
                         </NTab>
-                        <NTab name="auth.register" @click="$route.name !== 'auth.register' && $router.push({ name: 'auth.register' })">
+                        <!-- <NTab name="auth.register" @click="$route.name !== 'auth.register' && $router.push({ name: 'auth.register' })">
                             <div class="flex items-center text-lg gap-2 uppercase">
                                 <span>Sign up</span>
                             </div>
-                        </NTab>
+                        </NTab> -->
                     </NTabs>
                     <router-view v-slot="{ Component }">
                         <transition

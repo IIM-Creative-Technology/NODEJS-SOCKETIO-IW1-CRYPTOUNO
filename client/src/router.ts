@@ -16,7 +16,7 @@ router.beforeEach((to, from, next) => {
 
     if (!from || to.path !== from.path) loadingBarApi?.start();
 
-    if (to?.meta?.auth && !userStore.isLoggedIn) return next("/auth");
+    if (to?.meta?.auth && !userStore.isLoggedIn) return next("/auth/login");
     return next();
 });
 router.afterEach(() => {
